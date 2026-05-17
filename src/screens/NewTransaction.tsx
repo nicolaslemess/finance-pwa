@@ -1,12 +1,21 @@
 import { useState } from "react";
 import { db } from "../db/database";
 import type { TransactionType } from "../types/transaction";
+import { ScreenHeader } from "../components/ScreenHeader";
 
 type Props = {
   onSaved: () => void;
+  menuOpen: boolean;
+  onToggleMenu: () => void;
+  onGoBackup: () => void;
 };
 
-export function NewTransaction({ onSaved }: Props) {
+export function NewTransaction({
+  onSaved,
+  menuOpen,
+  onToggleMenu,
+  onGoBackup
+}: Props) {
   const [type, setType] = useState<TransactionType>("expense");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("Alimentação");
@@ -39,75 +48,82 @@ export function NewTransaction({ onSaved }: Props) {
 
   return (
     <main className="screen">
-      <h1>Novo lançamento</h1>
+      <ScreenHeader
+        title="Novo lançamento"
+        menuOpen={menuOpen}
+        onToggleMenu={onToggleMenu}
+        onGoBackup={onGoBackup}
+      />
 
-      <form onSubmit={handleSubmit} className="form">
-        <div className="segmented">
-          <button
-            type="button"
-            className={type === "expense" ? "active" : ""}
-            onClick={() => setType("expense")}
-          >
-            Saída
+      <div className="scrollArea">
+        <form onSubmit={handleSubmit} className="form">
+          <div className="segmented">
+            <button
+              type="button"
+              className={type === "expense" ? "active" : ""}
+              onClick={() => setType("expense")}
+            >
+              Saída
+            </button>
+
+            <button
+              type="button"
+              className={type === "income" ? "active" : ""}
+              onClick={() => setType("income")}
+            >
+              Entrada
+            </button>
+          </div>
+
+          <label>
+            Valor
+            <input
+              inputMode="decimal"
+              placeholder="0,00"
+              value={amount}
+              onChange={(event) => setAmount(event.target.value)}
+            />
+          </label>
+
+          <label>
+            Categoria
+            <select
+              value={category}
+              onChange={(event) => setCategory(event.target.value)}
+            >
+              <option>Alimentação</option>
+              <option>Transporte</option>
+              <option>Moradia</option>
+              <option>Saúde</option>
+              <option>Lazer</option>
+              <option>Trabalho</option>
+              <option>Outros</option>
+            </select>
+          </label>
+
+          <label>
+            Descrição
+            <input
+              placeholder="Ex: almoço"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+            />
+          </label>
+
+          <label>
+            Data
+            <input
+              type="date"
+              value={date}
+              onChange={(event) => setDate(event.target.value)}
+            />
+          </label>
+
+          <button className="primary" type="submit">
+            Salvar lançamento
           </button>
-
-          <button
-            type="button"
-            className={type === "income" ? "active" : ""}
-            onClick={() => setType("income")}
-          >
-            Entrada
-          </button>
-        </div>
-
-        <label>
-          Valor
-          <input
-            inputMode="decimal"
-            placeholder="0,00"
-            value={amount}
-            onChange={(event) => setAmount(event.target.value)}
-          />
-        </label>
-
-        <label>
-          Categoria
-          <select
-            value={category}
-            onChange={(event) => setCategory(event.target.value)}
-          >
-            <option>Alimentação</option>
-            <option>Transporte</option>
-            <option>Moradia</option>
-            <option>Saúde</option>
-            <option>Lazer</option>
-            <option>Trabalho</option>
-            <option>Outros</option>
-          </select>
-        </label>
-
-        <label>
-          Descrição
-          <input
-            placeholder="Ex: almoço"
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-          />
-        </label>
-
-        <label>
-          Data
-          <input
-            type="date"
-            value={date}
-            onChange={(event) => setDate(event.target.value)}
-          />
-        </label>
-
-        <button className="primary" type="submit">
-          Salvar lançamento
-        </button>
-      </form>
+        </form>
+      </div>
     </main>
   );
 }

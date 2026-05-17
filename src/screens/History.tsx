@@ -1,8 +1,19 @@
 import { useEffect, useState } from "react";
 import { db } from "../db/database";
 import type { Transaction } from "../types/transaction";
+import { ScreenHeader } from "../components/ScreenHeader";
 
-export function History() {
+type HistoryProps = {
+  menuOpen: boolean;
+  onToggleMenu: () => void;
+  onGoBackup: () => void;
+};
+
+export function History({
+  menuOpen,
+  onToggleMenu,
+  onGoBackup
+}: HistoryProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   async function loadTransactions() {
@@ -21,40 +32,51 @@ export function History() {
     loadTransactions();
   }, []);
 
+  function formatCurrency(value: number) {
+    return value.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL"
+    });
+  }
+
   return (
     <main className="screen">
-      <h1>Histórico</h1>
+      <ScreenHeader
+        title="Histórico"
+        menuOpen={menuOpen}
+        onToggleMenu={onToggleMenu}
+        onGoBackup={onGoBackup}
+      />
 
-      {transactions.length === 0 ? (
-        <p>Nenhum lançamento cadastrado.</p>
-      ) : (
-        <ul className="list">
-          {transactions.map((item) => (
-            <li key={item.id} className="listItem">
-              <div>
-                <strong>{item.description || item.category}</strong>
-                <span>
-                  {item.category} · {item.date}
-                </span>
-              </div>
+      <div className="scrollArea">
+        {transactions.length === 0 ? (
+          <p>Nenhum lançamento cadastrado.</p>
+        ) : (
+          <ul className="list">
+            {transactions.map((item) => (
+              <li key={item.id} className="listItem">
+                <div>
+                  <strong>{item.description || item.category}</strong>
+                  <span>
+                    {item.category} · {item.date}
+                  </span>
+                </div>
 
-              <div className="right">
-                <strong>
-                  {item.type === "expense" ? "-" : "+"}
-                  {item.amount.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL"
-                  })}
-                </strong>
+                <div className="right">
+                  <strong>
+                    {item.type === "expense" ? "-" : "+"}
+                    {formatCurrency(item.amount)}
+                  </strong>
 
-                <button onClick={() => deleteTransaction(item.id)}>
-                  Apagar
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+                  <button onClick={() => deleteTransaction(item.id)}>
+                    Apagar
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </main>
   );
 }

@@ -1,57 +1,295 @@
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  color-scheme: dark;
+
+  --bg: #050607;
+  --bg-soft: #0b0d10;
+  --card: #111418;
+  --card-soft: #151922;
+  --border: #242a33;
+  --border-soft: rgba(255, 255, 255, 0.08);
+
+  --text: #f5f7fa;
+  --text-muted: #8f98a8;
+  --text-soft: #c8ced8;
+
+  --primary: #ffffff;
+  --primary-text: #050607;
+
+  --danger: #ff5c5c;
+  --success: #4ade80;
+
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+}
+
+/* Base fixa */
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
-  margin: 0;
+  position: fixed;
+  inset: 0;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #f4f4f5;
-  color: #111827;
+  color: var(--text);
 }
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
+  font-size: 16px;
 }
 
+button {
+  cursor: pointer;
+}
+
+/* Estrutura principal */
 .app {
-  min-height: 100vh;
-  padding-bottom: 96px;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg);
 }
 
 .screen {
   width: 100%;
   max-width: 480px;
+  height: 100dvh;
   margin: 0 auto;
-  padding: 24px 18px;
+  padding:
+    calc(24px + env(safe-area-inset-top))
+    18px
+    calc(86px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: screenEnter 0.32s ease-out both;
 }
 
+/* Área interna que rola */
+.scrollArea {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 20px;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scrollArea::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Tipografia */
 h1 {
   margin: 0 0 24px;
   font-size: 32px;
   letter-spacing: -0.04em;
+  color: var(--text);
+  flex-shrink: 0;
 }
 
 h2 {
   margin-top: 28px;
   font-size: 18px;
+  color: var(--text);
 }
 
+p {
+  color: var(--text-muted);
+}
+
+/* Header superior */
+.screenHeader {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 24px;
+  flex-shrink: 0;
+}
+
+.screenHeader h1 {
+  margin: 0;
+}
+
+.settingsButton {
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  background: var(--card);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5px;
+  padding: 0;
+  box-shadow: var(--shadow);
+}
+
+.settingsButton span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--text);
+}
+
+/* Bottom sheet */
+.sheetOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: overlayEnter 0.22s ease-out both;
+}
+
+.sheetOverlay.isClosing {
+  animation: overlayExit 0.24s ease-in both;
+}
+
+.bottomSheet {
+  width: calc(100% - 32px);
+  max-width: 440px;
+  margin: 0 0 20px;
+  background: rgba(17, 20, 24, 0.96);
+  border: 1px solid var(--border-soft);
+  border-radius: 28px;
+  padding: 10px 14px 16px;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.72);
+  animation: sheetEnter 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.bottomSheet.isClosing {
+  animation: sheetExit 0.24s ease-in both;
+}
+
+.sheetHandle {
+  width: 44px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  margin: 2px auto 14px;
+}
+
+.sheetHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sheetHeader span {
+  color: var(--text);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.03em;
+}
+
+.sheetHeader button {
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 700;
+  padding: 8px;
+}
+
+.sheetOptions {
+  display: grid;
+  gap: 10px;
+}
+
+.sheetOptions button {
+  width: 100%;
+  border: 1px solid var(--border-soft);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 18px;
+  padding: 14px;
+  text-align: left;
+  font-weight: 800;
+}
+
+.sheetOptions button span {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.sheetOptions button:disabled {
+  opacity: 0.45;
+}
+
+/* Cards */
 .card {
-  background: #ffffff;
+  position: relative;
+  background: linear-gradient(180deg, var(--card-soft), var(--card));
+  border: 1px solid var(--border-soft);
   border-radius: 24px;
   padding: 18px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow);
+  animation: cardEnter 0.34s ease-out both;
+  overflow: hidden;
+}
+
+/* Glow aplicado em todas as boxes principais */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.11), transparent 42%);
+  transform: translateX(-28%);
+  pointer-events: none;
+}
+
+/* Garante que o conteúdo fique acima do glow */
+.card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .hero {
   margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
 }
 
 .card span {
   display: block;
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
@@ -60,6 +298,7 @@ h2 {
   margin-top: 8px;
   font-size: 24px;
   letter-spacing: -0.03em;
+  color: var(--text);
 }
 
 .grid {
@@ -68,31 +307,87 @@ h2 {
   gap: 14px;
 }
 
+.grid .card:nth-child(1) {
+  animation-delay: 0.04s;
+}
+
+.grid .card:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+/* Formulários */
 .form {
   display: grid;
   gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+.form > * {
+  min-width: 0;
 }
 
 label {
   display: grid;
   gap: 8px;
+  width: 100%;
+  min-width: 0;
   font-weight: 600;
+  color: var(--text-soft);
 }
 
 input,
-select {
+select,
+textarea {
+  display: block;
   width: 100%;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
+  max-width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
   border-radius: 16px;
   padding: 14px 16px;
   outline: none;
 }
 
+/* Correção específica para o campo Data no iPhone/Safari */
+input[type="date"] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #606878;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--border);
+  box-shadow: none;
+  outline: none;
+}
+
+select option {
+  background: var(--card);
+  color: var(--text);
+}
+
+/* Toggle entrada/saída */
 .segmented {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  background: #e5e7eb;
+  background: #0d1015;
+  border: 1px solid var(--border);
   padding: 4px;
   border-radius: 18px;
 }
@@ -102,22 +397,25 @@ select {
   padding: 12px;
   border-radius: 14px;
   background: transparent;
+  color: var(--text-muted);
 }
 
 .segmented .active {
-  background: #111827;
-  color: white;
+  background: var(--primary);
+  color: var(--primary-text);
+  box-shadow: 0 8px 22px rgba(255, 255, 255, 0.12);
 }
 
 .primary {
   border: 0;
   border-radius: 18px;
   padding: 16px;
-  color: white;
-  background: #111827;
+  color: var(--primary-text);
+  background: var(--primary);
   font-weight: 700;
 }
 
+/* Lista */
 .list {
   list-style: none;
   padding: 0;
@@ -127,19 +425,62 @@ select {
 }
 
 .listItem {
-  background: #ffffff;
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--border-soft);
   border-radius: 18px;
   padding: 14px;
   display: flex;
   justify-content: space-between;
   gap: 12px;
   align-items: center;
+  animation: cardEnter 0.34s ease-out both;
+  overflow: hidden;
+}
+
+/* Glow aplicado também nos itens/listas */
+.listItem::before {
+  content: "";
+  position: absolute;
+  inset: -45%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.075), transparent 42%);
+  transform: translateX(-28%);
+  pointer-events: none;
+}
+
+.listItem > * {
+  position: relative;
+  z-index: 1;
+}
+
+.listItem:nth-child(1) {
+  animation-delay: 0.03s;
+}
+
+.listItem:nth-child(2) {
+  animation-delay: 0.06s;
+}
+
+.listItem:nth-child(3) {
+  animation-delay: 0.09s;
+}
+
+.listItem:nth-child(4) {
+  animation-delay: 0.12s;
+}
+
+.listItem:nth-child(5) {
+  animation-delay: 0.15s;
+}
+
+.listItem strong {
+  color: var(--text);
 }
 
 .listItem span {
   display: block;
   margin-top: 4px;
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
@@ -151,38 +492,193 @@ select {
   margin-top: 6px;
   border: 0;
   background: transparent;
-  color: #ef4444;
+  color: var(--danger);
   font-size: 13px;
 }
 
+/* Menu inferior */
 .bottomNav {
   position: fixed;
   left: 50%;
-  bottom: 18px;
+  bottom: 20px;
   transform: translateX(-50%);
   width: calc(100% - 32px);
   max-width: 440px;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(12, 14, 18, 0.86);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(229, 231, 235, 0.8);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-soft);
   border-radius: 28px;
   padding: 10px;
   display: grid;
   grid-template-columns: 1fr 64px 1fr;
   gap: 8px;
-  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.14);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+  animation: navEnter 0.42s ease-out both;
+  z-index: 20;
 }
 
 .bottomNav button {
   border: 0;
   background: transparent;
+  color: var(--text-muted);
   border-radius: 20px;
   padding: 14px 10px;
   font-weight: 700;
 }
 
 .bottomNav .addButton {
-  background: #111827;
-  color: white;
+  background: var(--primary);
+  color: var(--primary-text);
   font-size: 24px;
+  animation: softPulse 2.8s ease-out infinite;
+}
+
+/* Backup */
+.backupActions {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.secondaryButton {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+  color: var(--text);
+  background: var(--card);
+  font-weight: 700;
+}
+
+.statusText {
+  margin-top: 14px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Transições sem hover/active */
+.card,
+.listItem,
+input,
+select,
+textarea,
+.primary,
+.secondaryButton,
+.segmented button,
+.bottomNav button,
+.settingsButton,
+.sheetHeader button,
+.sheetOptions button {
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    opacity 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+/* Animações */
+@keyframes screenEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes navEnter {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(18px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+@keyframes softPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.14);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+@keyframes overlayEnter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlayExit {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes sheetEnter {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes sheetExit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+}
+
+/* Acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
 }
