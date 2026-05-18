@@ -2,12 +2,9 @@ import { useRef, useState } from "react";
 import { db } from "../db/database";
 import type { Transaction } from "../types/transaction";
 import { ScreenHeader } from "../components/ScreenHeader";
+import type { HeaderNavigationProps } from "../App";
 
-type BackupProps = {
-  menuOpen: boolean;
-  onToggleMenu: () => void;
-  onGoBackup: () => void;
-};
+type BackupProps = HeaderNavigationProps;
 
 type BackupFile = {
   app: "finance-pwa";

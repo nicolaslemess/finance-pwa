@@ -2,27 +2,27 @@ import { useEffect, useState } from "react";
 import { db } from "../db/database";
 import type { Transaction } from "../types/transaction";
 import { ScreenHeader } from "../components/ScreenHeader";
+import type { HeaderNavigationProps } from "../App";
+import { formatCurrency } from "../utils/format";
 
-type DashboardProps = {
-  menuOpen: boolean;
-  onToggleMenu: () => void;
-  onGoBackup: () => void;
-};
+type DashboardProps = HeaderNavigationProps;
 
 export function Dashboard({
   menuOpen,
   onToggleMenu,
+  onGoDashboard,
+  onGoNew,
+  onGoHistory,
   onGoBackup
 }: DashboardProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  async function loadTransactions() {
-    const items = await db.transactions.orderBy("date").reverse().toArray();
-    setTransactions(items);
-  }
-
   useEffect(() => {
-    loadTransactions();
+    void db.transactions
+      .orderBy("date")
+      .reverse()
+      .toArray()
+      .then(setTransactions);
   }, []);
 
   const income = transactions
@@ -35,19 +35,15 @@ export function Dashboard({
 
   const balance = income - expense;
 
-  function formatCurrency(value: number) {
-    return value.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL"
-    });
-  }
-
   return (
     <main className="screen">
       <ScreenHeader
-        title="Finanças"
+        title="Resumo"
         menuOpen={menuOpen}
         onToggleMenu={onToggleMenu}
+        onGoDashboard={onGoDashboard}
+        onGoNew={onGoNew}
+        onGoHistory={onGoHistory}
         onGoBackup={onGoBackup}
       />
 

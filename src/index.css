@@ -5,11 +5,17 @@
 
 :root {
   color-scheme: dark;
+  --visual-viewport-top: 0px;
+  --visual-viewport-height: 100dvh;
+  --chat-input-lift: 20px;
+  --chat-input-keyboard-drop: 0px;
 
   --bg: #050607;
   --bg-soft: #0b0d10;
+
   --card: #111418;
   --card-soft: #151922;
+
   --border: #242a33;
   --border-soft: rgba(255, 255, 255, 0.08);
 
@@ -26,7 +32,7 @@
   --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
 }
 
-/* Base fixa */
+/* Base */
 html,
 body,
 #root {
@@ -35,6 +41,10 @@ body,
   margin: 0;
   background: var(--bg);
   overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
 }
 
 html {
@@ -59,9 +69,19 @@ textarea {
 
 button {
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
-/* Estrutura principal */
+input,
+textarea {
+  user-select: text;
+  -webkit-user-select: text;
+  -webkit-touch-callout: default;
+}
+
+/* App */
 .app {
   position: fixed;
   inset: 0;
@@ -69,6 +89,9 @@ button {
   height: 100dvh;
   overflow: hidden;
   background: var(--bg);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .screen {
@@ -83,10 +106,18 @@ button {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: screenEnter 0.32s ease-out both;
 }
 
-/* Área interna que rola */
+.screen:has(.chatScreen) {
+  position: fixed;
+  top: var(--visual-viewport-top);
+  left: 50%;
+  height: var(--visual-viewport-height);
+  transform: translateX(-50%);
+  touch-action: none;
+}
+
+/* Scroll */
 .scrollArea {
   flex: 1;
   min-height: 0;
@@ -97,7 +128,8 @@ button {
   -webkit-overflow-scrolling: touch;
 }
 
-.scrollArea::-webkit-scrollbar {
+.scrollArea::-webkit-scrollbar,
+.chatArea::-webkit-scrollbar {
   width: 0;
   height: 0;
 }
@@ -121,7 +153,7 @@ p {
   color: var(--text-muted);
 }
 
-/* Header superior */
+/* Header */
 .screenHeader {
   position: relative;
   z-index: 30;
@@ -131,6 +163,19 @@ p {
   gap: 16px;
   margin: 0 0 24px;
   flex-shrink: 0;
+}
+
+/* No iPhone, o teclado altera o visual viewport. Esta regra mantém o header
+   da tela de lançamento preso ao topo realmente visível. */
+.screen:has(.chatScreen) .screenHeader {
+  position: fixed;
+  top: calc(var(--visual-viewport-top) + 24px + env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 36px);
+  max-width: 444px;
+  margin: 0;
+  touch-action: none;
 }
 
 .screenHeader h1 {
@@ -265,7 +310,6 @@ p {
   overflow: hidden;
 }
 
-/* Glow aplicado em todas as boxes principais */
 .card::before {
   content: "";
   position: absolute;
@@ -275,7 +319,6 @@ p {
   pointer-events: none;
 }
 
-/* Garante que o conteúdo fique acima do glow */
 .card > * {
   position: relative;
   z-index: 1;
@@ -315,18 +358,6 @@ p {
   animation-delay: 0.08s;
 }
 
-/* Formulários */
-.form {
-  display: grid;
-  gap: 16px;
-  width: 100%;
-  min-width: 0;
-}
-
-.form > * {
-  min-width: 0;
-}
-
 label {
   display: grid;
   gap: 8px;
@@ -351,19 +382,6 @@ textarea {
   outline: none;
 }
 
-/* Correção específica para o campo Data no iPhone/Safari */
-input[type="date"] {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-input[type="date"]::-webkit-date-and-time-value {
-  text-align: left;
-}
-
 input::placeholder,
 textarea::placeholder {
   color: #606878;
@@ -380,30 +398,6 @@ textarea:focus {
 select option {
   background: var(--card);
   color: var(--text);
-}
-
-/* Toggle entrada/saída */
-.segmented {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  background: #0d1015;
-  border: 1px solid var(--border);
-  padding: 4px;
-  border-radius: 18px;
-}
-
-.segmented button {
-  border: 0;
-  padding: 12px;
-  border-radius: 14px;
-  background: transparent;
-  color: var(--text-muted);
-}
-
-.segmented .active {
-  background: var(--primary);
-  color: var(--primary-text);
-  box-shadow: 0 8px 22px rgba(255, 255, 255, 0.12);
 }
 
 .primary {
@@ -438,7 +432,6 @@ select option {
   overflow: hidden;
 }
 
-/* Glow aplicado também nos itens/listas */
 .listItem::before {
   content: "";
   position: absolute;
@@ -496,44 +489,6 @@ select option {
   font-size: 13px;
 }
 
-/* Menu inferior */
-.bottomNav {
-  position: fixed;
-  left: 50%;
-  bottom: 20px;
-  transform: translateX(-50%);
-  width: calc(100% - 32px);
-  max-width: 440px;
-  background: rgba(12, 14, 18, 0.86);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-soft);
-  border-radius: 28px;
-  padding: 10px;
-  display: grid;
-  grid-template-columns: 1fr 64px 1fr;
-  gap: 8px;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
-  animation: navEnter 0.42s ease-out both;
-  z-index: 20;
-}
-
-.bottomNav button {
-  border: 0;
-  background: transparent;
-  color: var(--text-muted);
-  border-radius: 20px;
-  padding: 14px 10px;
-  font-weight: 700;
-}
-
-.bottomNav .addButton {
-  background: var(--primary);
-  color: var(--primary-text);
-  font-size: 24px;
-  animation: softPulse 2.8s ease-out infinite;
-}
-
 /* Backup */
 .backupActions {
   display: grid;
@@ -556,7 +511,184 @@ select option {
   text-align: center;
 }
 
-/* Transições sem hover/active */
+/* Chat */
+.chatScreen {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-top: 70px;
+}
+
+.chatArea {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 104px;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+.emptyChat {
+  margin: auto 0;
+  text-align: center;
+  color: var(--text-muted);
+  padding: 24px;
+}
+
+.emptyChat span {
+  display: block;
+  color: var(--text);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+
+.emptyChat p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.chatBubble {
+  position: relative;
+  max-width: 92%;
+  border-radius: 22px;
+  padding: 14px;
+  animation: cardEnter 0.28s ease-out both;
+}
+
+.chatBubble p {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.chatBubble p + p {
+  margin-top: 6px;
+  color: var(--text-muted);
+}
+
+.chatBubble strong {
+  display: block;
+  margin: 10px 0 8px;
+  color: var(--text);
+  font-size: 20px;
+  letter-spacing: -0.03em;
+}
+
+.appBubble {
+  align-self: flex-start;
+  background: linear-gradient(180deg, var(--card-soft), var(--card));
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow);
+}
+
+.userBubble {
+  align-self: flex-end;
+  background: var(--primary);
+  color: var(--primary-text);
+}
+
+.userBubble p {
+  color: var(--primary-text);
+}
+
+.previewBubble {
+  width: 100%;
+  max-width: 100%;
+}
+
+.previewActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.chatInputBar {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding: 10px;
+  margin-bottom: 8px;
+  background: rgba(12, 14, 18, 0.86);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-soft);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+}
+
+.screen:has(.chatScreen) .chatInputBar {
+  position: fixed;
+  left: 50%;
+  top: calc(
+    var(--visual-viewport-top) +
+    var(--visual-viewport-height) -
+    8px -
+    var(--chat-input-lift) -
+    env(safe-area-inset-bottom) +
+    var(--chat-input-keyboard-drop)
+  );
+  transform: translate(-50%, -100%);
+  width: calc(100% - 36px);
+  max-width: 444px;
+  z-index: 35;
+  touch-action: none;
+  transition:
+    top 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.18s ease,
+    color 0.18s ease,
+    opacity 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+:root[data-keyboard-open="true"] {
+  --chat-input-lift: 10px;
+  --chat-input-keyboard-drop: 0px;
+}
+
+.chatInputBar input {
+  border-radius: 18px;
+}
+
+.chatInputField {
+  position: relative;
+  min-width: 0;
+}
+
+.chatInputOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border: 0;
+  border-radius: 18px;
+  background: transparent;
+  padding: 0;
+  -webkit-touch-callout: none;
+}
+
+.chatSendButton {
+  border: 0;
+  border-radius: 18px;
+  padding: 0 16px;
+  background: var(--primary);
+  color: var(--primary-text);
+  font-weight: 800;
+}
+
+
+/* Transições */
 .card,
 .listItem,
 input,
@@ -564,11 +696,10 @@ select,
 textarea,
 .primary,
 .secondaryButton,
-.segmented button,
-.bottomNav button,
 .settingsButton,
 .sheetHeader button,
-.sheetOptions button {
+.sheetOptions button,
+.chatSendButton {
   transition:
     background 0.18s ease,
     color 0.18s ease,
@@ -577,18 +708,6 @@ textarea,
 }
 
 /* Animações */
-@keyframes screenEnter {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.985);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 @keyframes cardEnter {
   from {
     opacity: 0;

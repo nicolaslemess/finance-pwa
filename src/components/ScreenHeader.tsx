@@ -1,25 +1,34 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type ScreenHeaderProps = {
   title: string;
   menuOpen: boolean;
   onToggleMenu: () => void;
-  onGoBackup: () => void;
+
+  onGoDashboard?: () => void;
+  onGoNew?: () => void;
+  onGoHistory?: () => void;
+  onGoBackup?: () => void;
 };
 
 export function ScreenHeader({
   title,
   menuOpen,
   onToggleMenu,
+  onGoDashboard,
+  onGoNew,
+  onGoHistory,
   onGoBackup
 }: ScreenHeaderProps) {
   const [isClosing, setIsClosing] = useState(false);
 
-  useEffect(() => {
-    if (menuOpen) {
+  function toggleMenu() {
+    if (!menuOpen) {
       setIsClosing(false);
     }
-  }, [menuOpen]);
+
+    onToggleMenu();
+  }
 
   function closeMenu() {
     setIsClosing(true);
@@ -30,12 +39,14 @@ export function ScreenHeader({
     }, 240);
   }
 
-  function goBackup() {
+  function navigate(action?: () => void) {
+    if (!action) return;
+
     setIsClosing(true);
 
     window.setTimeout(() => {
       setIsClosing(false);
-      onGoBackup();
+      action();
     }, 240);
   }
 
@@ -48,7 +59,7 @@ export function ScreenHeader({
           className="settingsButton"
           type="button"
           aria-label="Abrir menu"
-          onClick={onToggleMenu}
+          onClick={toggleMenu}
         >
           <span />
           <span />
@@ -68,26 +79,36 @@ export function ScreenHeader({
             <div className="sheetHandle" />
 
             <div className="sheetHeader">
-              <span>Opções</span>
+              <span>Menu</span>
 
               <button type="button" onClick={closeMenu}>
-                X
+                Fechar
               </button>
             </div>
 
             <div className="sheetOptions">
-              <button type="button" onClick={goBackup}>
+              <button type="button" onClick={() => navigate(onGoNew)}>
+                Lançar
+                <span>Registrar uma entrada ou saída</span>
+              </button>
+
+              <button type="button" onClick={() => navigate(onGoDashboard)}>
+                Resumo
+                <span>Ver saldo, entradas e saídas</span>
+              </button>
+
+              <button type="button" onClick={() => navigate(onGoHistory)}>
+                Histórico
+                <span>Consultar lançamentos salvos</span>
+              </button>
+
+              <button type="button" onClick={() => navigate(onGoBackup)}>
                 Backup
                 <span>Exportar ou importar seus dados</span>
               </button>
 
               <button type="button" disabled>
-                Temas
-                <span>Em breve</span>
-              </button>
-
-              <button type="button" disabled>
-                Configurações
+                Cartões
                 <span>Em breve</span>
               </button>
             </div>

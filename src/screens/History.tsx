@@ -2,16 +2,17 @@ import { useEffect, useState } from "react";
 import { db } from "../db/database";
 import type { Transaction } from "../types/transaction";
 import { ScreenHeader } from "../components/ScreenHeader";
+import type { HeaderNavigationProps } from "../App";
+import { formatCurrency } from "../utils/format";
 
-type HistoryProps = {
-  menuOpen: boolean;
-  onToggleMenu: () => void;
-  onGoBackup: () => void;
-};
+type HistoryProps = HeaderNavigationProps;
 
 export function History({
   menuOpen,
   onToggleMenu,
+  onGoDashboard,
+  onGoNew,
+  onGoHistory,
   onGoBackup
 }: HistoryProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -29,15 +30,12 @@ export function History({
   }
 
   useEffect(() => {
-    loadTransactions();
+    void db.transactions
+      .orderBy("date")
+      .reverse()
+      .toArray()
+      .then(setTransactions);
   }, []);
-
-  function formatCurrency(value: number) {
-    return value.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL"
-    });
-  }
 
   return (
     <main className="screen">
@@ -45,6 +43,9 @@ export function History({
         title="Histórico"
         menuOpen={menuOpen}
         onToggleMenu={onToggleMenu}
+        onGoDashboard={onGoDashboard}
+        onGoNew={onGoNew}
+        onGoHistory={onGoHistory}
         onGoBackup={onGoBackup}
       />
 
